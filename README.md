@@ -2,7 +2,9 @@
 
 A full-stack **Loan Management System (LMS)** with a borrower portal and an internal operations dashboard, built as part of the CreditSea assignment.
 
----
+## Demo Video
+
+[Watch Demo](https://drive.google.com/file/d/1rS273fmgVVCCKifsi7FGjORjFq32-9LA/view?usp=sharing)
 
 ## Tech Stack
 
