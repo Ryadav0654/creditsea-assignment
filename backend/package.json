@@ -7,7 +7,9 @@
     "dev": "bun --watch src/index.ts",
     "start": "bun run src/index.ts",
     "seed": "bun run src/seed.ts",
-    "build": "bun run build"
+    "build": "bun run build",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "devDependencies": {
     "@types/bcryptjs": "^3.0.0",
@@ -16,7 +18,8 @@
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/mongoose": "^5.11.97",
-    "@types/multer": "^2.1.0"
+    "@types/multer": "^2.1.0",
+    "prettier": "^3.8.3"
   },
   "peerDependencies": {
     "typescript": "^5"
@@ -28,6 +31,7 @@
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.6.3",
-    "multer": "^2.1.1"
+    "multer": "^2.1.1",
+    "zod": "^4.4.3"
   }
 }

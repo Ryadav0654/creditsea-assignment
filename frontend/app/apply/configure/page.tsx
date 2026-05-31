@@ -4,19 +4,13 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import type { AxiosError } from "axios";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Calculator, Send } from "lucide-react";
+import { ArrowLeft, Send } from "lucide-react";
 import api from "@/lib/api";
 import { formatCurrency } from "@/lib/auth";
 import { StepBar } from "../layout";
+import { cn } from "@/lib/utils";
 
 const RATE = 12;
 
@@ -50,130 +44,116 @@ export default function ApplyStep3() {
   };
 
   return (
-    <Card className="border-none shadow-2xl bg-card/60 backdrop-blur-xl px-6 py-8">
-      <CardHeader className="pb-4">
+    <div className="w-full relative">
+      <div className="pb-8">
         <StepBar step={3} />
-        <div className="flex items-center">
-          {/* <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
-            <Calculator className="w-6 h-6" />
-          </div> */}
+        <div className="flex items-center mt-4">
           <div>
-            <CardTitle className="text-2xl font-bold tracking-tight">
+            <h2 className="text-2xl font-bold tracking-tight text-slate-900">
               Loan Setup
-            </CardTitle>
-            <CardDescription className="text-sm mt-1">
+            </h2>
+            <p className="text-sm mt-1 text-slate-500">
               Select your required amount and tenure. Interest is {RATE}% p.a.
-            </CardDescription>
+            </p>
           </div>
         </div>
-      </CardHeader>
+      </div>
 
-      <CardContent className="space-y-8">
-        {/* Amount slider */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-muted-foreground">
-              Loan Amount
-            </span>
-            <span className="text-2xl font-extrabold text-primary">
-              {formatCurrency(amount)}
-            </span>
-          </div>
-          <Slider
-            id="slider-amount"
-            min={50000}
-            max={500000}
-            step={5000}
-            value={[amount]}
-            onValueChange={([v]) => setAmount(v!)}
-            className="cursor-pointer py-2"
-          />
-          <div className="flex justify-between text-xs font-semibold text-muted-foreground/60">
-            <span>₹50,000</span>
-            <span>₹5,00,000</span>
-          </div>
-        </div>
-
-        {/* Tenure slider */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium text-muted-foreground">
-              Tenure
-            </span>
-            <span className="text-2xl font-extrabold text-primary">
-              {tenure} days
-            </span>
-          </div>
-          <Slider
-            id="slider-tenure"
-            min={30}
-            max={365}
-            step={5}
-            value={[tenure]}
-            onValueChange={([v]) => setTenure(v!)}
-            className="cursor-pointer py-2"
-          />
-          <div className="flex justify-between text-xs font-semibold text-muted-foreground/60">
-            <span>30 days</span>
-            <span>365 days</span>
-          </div>
-        </div>
-
-        <Separator className="bg-border/60" />
-
-        {/* Live repayment panel */}
-        <div className="space-y-4 shadow-sm">
-          <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-primary/60"></span>
-            Repayment Summary
-          </p>
-          <div className="grid grid-cols-3 gap-4">
-            {[
-              {
-                label: "Principal",
-                value: formatCurrency(amount),
-                highlight: false,
-              },
-              {
-                label: "Interest",
-                value: formatCurrency(si),
-                highlight: false,
-              },
-              {
-                label: "Total Due",
-                value: formatCurrency(total),
-                highlight: true,
-              },
-            ].map((item) => (
-              <div
-                key={item.label}
-                className={`rounded-xl p-3 text-center border transition-colors ${
-                  item.highlight
-                    ? "bg-primary/5 border-primary/20 shadow-sm shadow-primary/5"
-                    : "bg-background/50 border-border/40"
-                }`}
-              >
-                <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider mb-1.5">
-                  {item.label}
-                </p>
-                <p
-                  className={`text-lg font-extrabold tracking-tight ${item.highlight ? "text-primary" : "text-foreground"}`}
-                >
-                  {item.value}
-                </p>
+      <div className="space-y-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative">
+          
+          {/* Sliders Container */}
+          <div className="space-y-8">
+            {/* Amount slider */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-semibold text-slate-700">
+                  Loan Amount
+                </span>
+                <span className="text-2xl font-extrabold text-primary">
+                  {formatCurrency(amount)}
+                </span>
               </div>
-            ))}
+              <Slider
+                id="slider-amount"
+                min={50000}
+                max={500000}
+                step={5000}
+                value={[amount]}
+                onValueChange={([v]) => setAmount(v!)}
+                className="cursor-pointer py-2"
+              />
+              <div className="flex justify-between text-xs font-semibold text-slate-400">
+                <span>₹50,000</span>
+                <span>₹5,00,000</span>
+              </div>
+            </div>
+
+            {/* Tenure slider */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-semibold text-slate-700">
+                  Tenure
+                </span>
+                <span className="text-2xl font-extrabold text-primary">
+                  {tenure} days
+                </span>
+              </div>
+              <Slider
+                id="slider-tenure"
+                min={30}
+                max={365}
+                step={5}
+                value={[tenure]}
+                onValueChange={([v]) => setTenure(v!)}
+                className="cursor-pointer py-2"
+              />
+              <div className="flex justify-between text-xs font-semibold text-slate-400">
+                <span>30 days</span>
+                <span>365 days</span>
+              </div>
+            </div>
           </div>
-          <p className="text-[11px] text-muted-foreground/80 text-center font-medium">
-            Calculated as Simple Interest: (P × {RATE} × T) / 36500
-          </p>
+
+          {/* Sticky Summary Card */}
+          <div className="md:sticky md:top-6 self-start">
+            <div className="rounded-2xl bg-indigo-50/50 border border-indigo-100 p-5 space-y-4 shadow-sm">
+              <p className="text-xs font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary/60"></span>
+                Repayment Summary
+              </p>
+              
+              <div className="space-y-3">
+                <div className="flex justify-between items-center text-sm font-medium text-slate-600">
+                  <span>Principal</span>
+                  <span className="font-semibold text-slate-900">{formatCurrency(amount)}</span>
+                </div>
+                <div className="flex justify-between items-center text-sm font-medium text-slate-600">
+                  <span>Total Interest ({RATE}% p.a.)</span>
+                  <span className="font-semibold text-slate-900">{formatCurrency(si)}</span>
+                </div>
+                <Separator className="bg-slate-200" />
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-semibold text-slate-700">Total Due</span>
+                  <span className="text-2xl font-extrabold text-primary">{formatCurrency(total)}</span>
+                </div>
+              </div>
+              
+              <p className="text-[11px] text-slate-400 text-center font-medium pt-2">
+                Calculated as Simple Interest: (P × {RATE} × T) / 36500
+              </p>
+            </div>
+          </div>
+
         </div>
+
+        <Separator className="bg-slate-100" />
 
         <div className="flex gap-4">
           <Button
             variant="outline"
             size="lg"
-            className="h-14 px-6 rounded-xl hover:bg-muted"
+            className="h-14 px-6 rounded-xl border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-900"
             id="configure-back"
             onClick={() => router.push("/apply/upload")}
           >
@@ -183,12 +163,15 @@ export default function ApplyStep3() {
           <Button
             id="configure-apply"
             size="lg"
-            className="flex-1 h-14 rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all text-base"
+            className="flex-1 h-14 rounded-xl shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/25 transition-all text-base disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={handleApply}
             disabled={loading}
           >
             {loading ? (
-              "Submitting…"
+              <span className="flex items-center gap-2">
+                <span className="spinner-sm" />
+                Submitting…
+              </span>
             ) : (
               <>
                 <Send className="w-5 h-5 mr-2" />
@@ -197,7 +180,7 @@ export default function ApplyStep3() {
             )}
           </Button>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

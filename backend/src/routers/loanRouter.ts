@@ -1,28 +1,39 @@
-import { Router } from "express";
-import { submitBRE, uploadDocument, applyLoan, getMyLoans } from "../controllers/loanController.js";
-import { authenticate, authorize } from "../middleware/auth.js";
-import { uploadMiddleware } from "../middleware/upload.js";
-import type { Request, Response, NextFunction } from "express";
+import { Router } from 'express'
+import {
+  submitBRE,
+  uploadDocument,
+  applyLoan,
+  getMyLoans,
+} from '../controllers/loanController.js'
+import { authenticate, authorize } from '../middleware/auth.js'
+import { uploadMiddleware } from '../middleware/upload.js'
+import { validateBody } from '../middleware/validate.js'
+import { breSchema, applyLoanSchema } from '../validators/schemas.js'
+import type { Request, Response, NextFunction } from 'express'
 
-const router = Router();
+const router = Router()
 
 // All borrower loan routes require authentication + borrower role
-router.use(authenticate);
-router.use(authorize("borrower"));
+router.use(authenticate)
+router.use(authorize('borrower'))
 
-router.post("/bre", submitBRE);
+router.post('/bre', validateBody(breSchema), submitBRE)
 
-router.post("/upload", (req: Request, res: Response, next: NextFunction) => {
-  uploadMiddleware(req, res, (err) => {
-    if (err) {
-      res.status(400).json({ message: err.message });
-      return;
-    }
-    next();
-  });
-}, uploadDocument);
+router.post(
+  '/upload',
+  (req: Request, res: Response, next: NextFunction) => {
+    uploadMiddleware(req, res, (err) => {
+      if (err) {
+        res.status(400).json({ message: err.message })
+        return
+      }
+      next()
+    })
+  },
+  uploadDocument
+)
 
-router.post("/apply", applyLoan);
-router.get("/my", getMyLoans);
+router.post('/apply', validateBody(applyLoanSchema), applyLoan)
+router.get('/my', getMyLoans)
 
-export default router;
+export default router

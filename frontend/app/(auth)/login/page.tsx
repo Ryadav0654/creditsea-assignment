@@ -7,16 +7,8 @@ import type { AxiosError } from "axios";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, LogIn, CreditCard } from "lucide-react";
+import { AlertCircle, LogIn } from "lucide-react";
 import api from "@/lib/api";
 import { saveAuth } from "@/lib/auth";
 
@@ -56,16 +48,16 @@ export default function LoginPage() {
   };
 
   return (
-    <Card className="border-border/50 shadow-2xl">
-      <CardHeader className="pb-4 flex items-center flex-col">
-        <h1 className="font-extrabold text-4xl">CreditSea</h1>
-        <CardTitle className="text-xl font-bold">Welcome back</CardTitle>
-        <CardDescription>Sign in to your account to continue</CardDescription>
-      </CardHeader>
+    <div className="w-full">
+      <div className="pb-8 flex items-center flex-col">
+        <h1 className="font-extrabold text-4xl gradient-text mb-2">CreditSea</h1>
+        <h2 className="text-xl font-bold text-slate-900">Welcome back</h2>
+        <p className="text-slate-500 mt-1">Sign in to your account to continue</p>
+      </div>
 
-      <CardContent className="space-y-4">
+      <div className="space-y-6">
         {error && (
-          <Alert variant="destructive">
+          <Alert variant="destructive" className="bg-red-50 border-red-200 text-red-700">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>{error}</AlertDescription>
           </Alert>
@@ -73,7 +65,7 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="login-email">Email</Label>
+            <Label htmlFor="login-email" className="text-slate-700 font-medium">Email</Label>
             <Input
               id="login-email"
               type="email"
@@ -82,10 +74,11 @@ export default function LoginPage() {
               onChange={(e) => setForm({ ...form, email: e.target.value })}
               required
               autoComplete="email"
+              className="h-11 bg-slate-50 border-slate-200 focus:bg-white transition-colors"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="login-password">Password</Label>
+            <Label htmlFor="login-password" className="text-slate-700 font-medium">Password</Label>
             <Input
               id="login-password"
               type="password"
@@ -94,6 +87,7 @@ export default function LoginPage() {
               onChange={(e) => setForm({ ...form, password: e.target.value })}
               required
               autoComplete="current-password"
+              className="h-11 bg-slate-50 border-slate-200 focus:bg-white transition-colors"
             />
           </div>
           <Button
@@ -101,11 +95,14 @@ export default function LoginPage() {
             type="submit"
             variant="default"
             size="lg"
-            className="w-full py-4 cursor-pointer"
+            className="w-full h-12 cursor-pointer text-base shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/25 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={loading}
           >
             {loading ? (
-              "Signing in…"
+              <span className="flex items-center gap-2">
+                <span className="spinner-sm" />
+                Signing in…
+              </span>
             ) : (
               <>
                 <LogIn className="w-4 h-4 mr-2" />
@@ -116,11 +113,11 @@ export default function LoginPage() {
         </form>
 
         {/* Quick-fill test accounts */}
-        <div className="pt-2">
-          <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">
-            Test accounts
+        <div className="pt-3">
+          <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">
+            Demo accounts
           </p>
-          <div className="grid grid-cols-1 gap-1">
+          <div className="bg-slate-50 rounded-xl border border-slate-100 divide-y divide-slate-100">
             {TEST_ACCOUNTS.map((a) => (
               <button
                 key={a.role}
@@ -128,20 +125,20 @@ export default function LoginPage() {
                 onClick={() =>
                   setForm({ email: a.email, password: a.password })
                 }
-                className="flex items-center justify-between px-3 py-1.5 rounded-md text-xs text-left hover:bg-muted/50 transition-colors cursor-pointer group"
+                className="flex items-center justify-between w-full px-3.5 py-2.5 text-xs text-left hover:bg-indigo-50/50 transition-colors cursor-pointer first:rounded-t-xl last:rounded-b-xl"
               >
-                <span className="font-semibold text-primary group-hover:text-primary/80">
+                <span className="font-bold text-primary">
                   {a.role}
                 </span>
-                <span className="text-muted-foreground">{a.email}</span>
+                <span className="text-slate-400 font-mono text-[11px]">{a.email}</span>
               </button>
             ))}
           </div>
         </div>
-      </CardContent>
+      </div>
 
-      <CardFooter className="pt-3">
-        <p className="text-sm text-muted-foreground text-center w-full">
+      <div className="pt-6">
+        <p className="text-sm text-slate-500 text-center w-full">
           Don&apos;t have an account?{" "}
           <Link
             href="/register"
@@ -150,7 +147,7 @@ export default function LoginPage() {
             Register here
           </Link>
         </p>
-      </CardFooter>
-    </Card>
+      </div>
+    </div>
   );
 }

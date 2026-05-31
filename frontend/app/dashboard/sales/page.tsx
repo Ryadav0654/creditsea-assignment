@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import {
   Card,
   CardContent,
@@ -18,15 +18,32 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Users, RefreshCw, UserCheck, UserX } from "lucide-react";
+import {
+  Users,
+  RefreshCw,
+  UserCheck,
+  UserX,
+  ChevronLeft,
+  ChevronRight,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+} from "lucide-react";
 import api from "@/lib/api";
 import type { User } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 export default function SalesPage() {
   const [allUsers, setAllUsers] = useState<User[]>([]);
   const [noLoanUsers, setNoLoanUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState("no-loan");
+
+  // Pagination & Sorting state
+  const [page, setPage] = useState(1);
+  const itemsPerPage = 10;
+  const [sortCol, setSortCol] = useState<keyof User | null>(null);
+  const [sortDesc, setSortDesc] = useState(false);
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
@@ -37,6 +54,7 @@ export default function SalesPage() {
       ]);
       setAllUsers(a.data);
       setNoLoanUsers(b.data);
+      setPage(1); // Reset page on fetch
     } finally {
       setLoading(false);
     }
@@ -46,26 +64,92 @@ export default function SalesPage() {
     fetchUsers();
   }, [fetchUsers]);
 
-  const displayed = tab === "no-loan" ? noLoanUsers : allUsers;
+  // Handle tab change
+  const handleTabChange = (v: string) => {
+    setTab(v);
+    setPage(1);
+  };
+
+  // Sort and paginate data
+  const displayedData = useMemo(() => {
+    let data = tab === "no-loan" ? [...noLoanUsers] : [...allUsers];
+
+    if (sortCol) {
+      data.sort((a, b) => {
+        const valA = String(a[sortCol] || "");
+        const valB = String(b[sortCol] || "");
+        return sortDesc ? valB.localeCompare(valA) : valA.localeCompare(valB);
+      });
+    }
+
+    const start = (page - 1) * itemsPerPage;
+    const paginated = data.slice(start, start + itemsPerPage);
+    return {
+      data: paginated,
+      total: data.length,
+      totalPages: Math.ceil(data.length / itemsPerPage),
+    };
+  }, [allUsers, noLoanUsers, tab, sortCol, sortDesc, page]);
+
+  const handleSort = (col: keyof User) => {
+    if (sortCol === col) {
+      if (sortDesc) {
+        setSortCol(null);
+        setSortDesc(false);
+      } else {
+        setSortDesc(true);
+      }
+    } else {
+      setSortCol(col);
+      setSortDesc(false);
+    }
+  };
+
+  const SortIcon = ({ col }: { col: keyof User }) => {
+    if (sortCol !== col)
+      return <ArrowUpDown className="w-3 h-3 ml-1 inline-block opacity-50" />;
+    return sortDesc ? (
+      <ArrowDown className="w-3 h-3 ml-1 inline-block text-primary" />
+    ) : (
+      <ArrowUp className="w-3 h-3 ml-1 inline-block text-primary" />
+    );
+  };
 
   const stats = [
-    { label: "Total Borrowers", value: allUsers.length, icon: Users },
-    { label: "No Application", value: noLoanUsers.length, icon: UserX },
+    {
+      label: "Total Borrowers",
+      value: allUsers.length,
+      icon: Users,
+      color: "text-indigo-600",
+      bg: "bg-indigo-50",
+      border: "border-indigo-100",
+    },
+    {
+      label: "No Application",
+      value: noLoanUsers.length,
+      icon: UserX,
+      color: "text-amber-600",
+      bg: "bg-amber-50",
+      border: "border-amber-100",
+    },
     {
       label: "Applied",
       value: allUsers.length - noLoanUsers.length,
       icon: UserCheck,
+      color: "text-emerald-600",
+      bg: "bg-emerald-50",
+      border: "border-emerald-100",
     },
   ];
 
   return (
-    <div className="p-8 space-y-6">
-      <div className="flex items-start justify-between">
+    <div className="p-6 sm:p-10 lg:p-12 space-y-8 max-w-7xl mx-auto">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
             Sales Module
           </h1>
-          <p className="text-muted-foreground text-sm mt-1">
+          <p className="text-slate-500 text-sm mt-1 font-medium">
             Track borrowers who registered but haven&apos;t applied yet.
           </p>
         </div>
@@ -73,30 +157,47 @@ export default function SalesPage() {
           variant="outline"
           size="lg"
           id="sales-refresh"
-          className="cursor-pointer"
+          className="cursor-pointer bg-white hover:bg-slate-50 border-slate-200 text-slate-700 shadow-sm"
           onClick={fetchUsers}
+          disabled={loading}
         >
-          <RefreshCw className="w-4 h-4 mr-2" />
+          <RefreshCw
+            className={cn("w-4 h-4 mr-2", loading && "animate-spin")}
+          />
           Refresh
         </Button>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {stats.map((s) => {
           const Icon = s.icon;
           return (
-            <Card key={s.label} className="">
-              <CardContent className="pt-5 pb-4">
-                <div className="flex items-center gap-8">
-                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <Icon className="w-4.5 h-4.5 text-primary" />
+            <Card
+              key={s.label}
+              className="bg-white border-slate-200 shadow-sm hover:shadow-md transition-shadow"
+            >
+              <CardContent className="p-6">
+                <div className="flex items-center gap-5">
+                  <div
+                    className={cn(
+                      "w-14 h-14 rounded-2xl flex items-center justify-center border shadow-sm",
+                      s.bg,
+                      s.color,
+                      s.border,
+                    )}
+                  >
+                    <Icon className="w-6 h-6" />
                   </div>
                   <div>
-                    <p className="text-3xl font-extrabold leading-none">
-                      {s.value}
+                    <p className="text-3xl font-black text-slate-900 tracking-tight">
+                      {loading ? (
+                        <span className="skeleton w-12 h-8 inline-block rounded" />
+                      ) : (
+                        s.value
+                      )}
                     </p>
-                    <p className="text-sm text-muted-foreground mt-1">
+                    <p className="text-sm font-semibold text-slate-500 uppercase tracking-wider mt-1">
                       {s.label}
                     </p>
                   </div>
@@ -108,83 +209,191 @@ export default function SalesPage() {
       </div>
 
       {/* Table */}
-      <Card className="border-border/50 p-6">
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-base">Borrowers</CardTitle>
-            <Tabs value={tab} onValueChange={setTab}>
-              <TabsList className="h-12 w-full">
+      <Card className="border-slate-200 bg-white shadow-sm overflow-hidden">
+        <CardHeader className="p-6 pb-4 border-b border-slate-100 bg-slate-50/50">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <CardTitle className="text-lg font-bold text-slate-900">
+                Borrowers Directory
+              </CardTitle>
+              <CardDescription className="text-slate-500 mt-1 font-medium">
+                {loading
+                  ? "Loading..."
+                  : `${displayedData.total} user${displayedData.total !== 1 ? "s" : ""} found`}
+              </CardDescription>
+            </div>
+            <Tabs
+              value={tab}
+              onValueChange={handleTabChange}
+              className="w-full sm:w-auto"
+            >
+              <TabsList className="h-11 w-full bg-slate-100 p-1 border border-slate-200">
                 <TabsTrigger
                   value="no-loan"
                   id="sales-filter-no-loan"
-                  className="text-xs"
+                  className="text-xs font-semibold data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm"
                 >
                   No Application
                 </TabsTrigger>
                 <TabsTrigger
                   value="all"
                   id="sales-filter-all"
-                  className="text-xs"
+                  className="text-xs font-semibold data-[state=active]:bg-white data-[state=active]:text-primary data-[state=active]:shadow-sm"
                 >
-                  All
+                  All Users
                 </TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
-          <CardDescription>
-            {displayed.length} user{displayed.length !== 1 ? "s" : ""} found
-          </CardDescription>
         </CardHeader>
         <CardContent className="p-0">
           {loading ? (
-            <div className="flex justify-center py-12">
-              <div className="spinner" />
+            <div className="p-6 space-y-4">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="flex gap-4">
+                  <div className="h-10 w-full skeleton rounded-lg" />
+                </div>
+              ))}
             </div>
-          ) : displayed.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              No users found.
+          ) : displayedData.total === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 px-4 text-center">
+              <div className="w-16 h-16 bg-slate-100 border border-slate-200 rounded-2xl flex items-center justify-center mb-4 shadow-inner">
+                <Users className="w-8 h-8 text-slate-400" />
+              </div>
+              <h3 className="text-lg font-bold text-slate-900 mb-1">
+                No users found
+              </h3>
+              <p className="text-slate-500 text-sm max-w-sm">
+                There are currently no borrowers matching this filter.
+              </p>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>#</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>BRE Done</TableHead>
-                  <TableHead>Doc Uploaded</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {displayed.map((u, i) => (
-                  <TableRow key={u.id}>
-                    <TableCell className="text-muted-foreground w-12">
-                      {i + 1}
-                    </TableCell>
-                    <TableCell className="font-semibold">{u.name}</TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {u.email}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={u.breCompleted ? "default" : "secondary"}
-                        className="text-xs"
+            <>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader className="bg-slate-50/80">
+                    <TableRow className="hover:bg-transparent border-slate-100">
+                      <TableHead className="w-16 text-center font-semibold text-slate-600">
+                        #
+                      </TableHead>
+                      <TableHead
+                        className="font-semibold text-slate-600 cursor-pointer hover:text-slate-900 select-none"
+                        onClick={() => handleSort("name")}
                       >
-                        {u.breCompleted ? "✓ Done" : "✗ Pending"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={u.uploadCompleted ? "default" : "secondary"}
-                        className="text-xs"
+                        Name <SortIcon col="name" />
+                      </TableHead>
+                      <TableHead
+                        className="font-semibold text-slate-600 cursor-pointer hover:text-slate-900 select-none"
+                        onClick={() => handleSort("email")}
                       >
-                        {u.uploadCompleted ? "✓ Done" : "✗ Pending"}
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                        Email <SortIcon col="email" />
+                      </TableHead>
+                      <TableHead className="font-semibold text-slate-600 text-center">
+                        BRE Status
+                      </TableHead>
+                      <TableHead className="font-semibold text-slate-600 text-center">
+                        Docs Status
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {displayedData.data.map((u, i) => {
+                      const absoluteIndex = (page - 1) * itemsPerPage + i + 1;
+                      return (
+                        <TableRow
+                          key={u.id}
+                          className="hover:bg-slate-50/80 border-slate-100 transition-colors"
+                        >
+                          <TableCell className="text-slate-400 text-center font-mono text-xs">
+                            {absoluteIndex}
+                          </TableCell>
+                          <TableCell className="font-bold text-slate-900">
+                            {u.name}
+                          </TableCell>
+                          <TableCell className="text-slate-500">
+                            {u.email}
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Badge
+                              variant="outline"
+                              className={cn(
+                                "text-[10px] uppercase tracking-wider font-bold shadow-sm",
+                                u.breCompleted
+                                  ? "bg-emerald-50 text-emerald-600 border-emerald-200"
+                                  : "bg-slate-50 text-slate-500 border-slate-200",
+                              )}
+                            >
+                              {u.breCompleted ? "✓ Passed" : "Pending"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-center">
+                            <Badge
+                              variant="outline"
+                              className={cn(
+                                "text-[10px] uppercase tracking-wider font-bold shadow-sm",
+                                u.uploadCompleted
+                                  ? "bg-emerald-50 text-emerald-600 border-emerald-200"
+                                  : "bg-slate-50 text-slate-500 border-slate-200",
+                              )}
+                            >
+                              {u.uploadCompleted ? "✓ Uploaded" : "Pending"}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* Pagination */}
+              {displayedData.totalPages > 1 && (
+                <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100 bg-slate-50/50">
+                  <p className="text-xs text-slate-500 font-medium">
+                    Showing{" "}
+                    <span className="font-bold text-slate-900">
+                      {(page - 1) * itemsPerPage + 1}
+                    </span>{" "}
+                    to{" "}
+                    <span className="font-bold text-slate-900">
+                      {Math.min(page * itemsPerPage, displayedData.total)}
+                    </span>{" "}
+                    of{" "}
+                    <span className="font-bold text-slate-900">
+                      {displayedData.total}
+                    </span>{" "}
+                    entries
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
+                      disabled={page === 1}
+                      className="h-8 border-slate-200 shadow-sm"
+                    >
+                      <ChevronLeft className="w-4 h-4 mr-1" /> Prev
+                    </Button>
+                    <div className="flex items-center gap-1 px-2 text-sm font-semibold text-slate-700">
+                      {page} / {displayedData.totalPages}
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() =>
+                        setPage((p) =>
+                          Math.min(displayedData.totalPages, p + 1),
+                        )
+                      }
+                      disabled={page === displayedData.totalPages}
+                      className="h-8 border-slate-200 shadow-sm"
+                    >
+                      Next <ChevronRight className="w-4 h-4 ml-1" />
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </CardContent>
       </Card>

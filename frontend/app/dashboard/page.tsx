@@ -21,8 +21,11 @@ export default function DashboardIndex() {
   }, [router]);
 
   return (
-    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
-      <div className="spinner" />
+    <div className="flex items-center justify-center h-screen bg-slate-50">
+      <div className="flex flex-col items-center gap-3">
+        <div className="spinner" />
+        <p className="text-sm font-medium text-slate-500">Redirecting to your module...</p>
+      </div>
     </div>
   );
 }

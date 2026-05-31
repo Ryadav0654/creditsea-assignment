@@ -4,13 +4,6 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import type { AxiosError } from "axios";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   AlertCircle,
@@ -71,29 +64,29 @@ export default function ApplyStep2() {
   };
 
   return (
-    <Card className="border-none shadow-2xl bg-card/60 backdrop-blur-xl px-6 py-8">
-      <CardHeader className="pb-6">
+    <div className="w-full">
+      <div className="pb-8">
         <StepBar step={2} />
         <div className="flex items-center gap-3 mt-4">
-          <div className="p-2.5 rounded-xl bg-primary/10 text-primary">
+          <div className="p-2.5 rounded-xl bg-indigo-50 text-primary border border-indigo-100">
             <Upload className="w-6 h-6" />
           </div>
           <div>
-            <CardTitle className="text-2xl font-bold tracking-tight">
+            <h2 className="text-2xl font-bold tracking-tight text-slate-900">
               Income Verification
-            </CardTitle>
-            <CardDescription className="text-sm mt-1">
+            </h2>
+            <p className="text-sm mt-1 text-slate-500">
               Upload your latest salary slip to verify income.
-            </CardDescription>
+            </p>
           </div>
         </div>
-      </CardHeader>
+      </div>
 
-      <CardContent className="space-y-6">
+      <div className="space-y-6 max-w-2xl mx-auto">
         {error && (
           <Alert
             variant="destructive"
-            className="bg-destructive/10 border-destructive/20 text-destructive"
+            className="bg-red-50 border-red-200 text-red-700"
           >
             <AlertCircle className="h-5 w-5" />
             <AlertDescription className="ml-2 font-medium">
@@ -119,22 +112,22 @@ export default function ApplyStep2() {
               if (f) handleFile(f);
             }}
             className={cn(
-              "border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer transition-all duration-300 select-none group",
+              "border-2 border-dashed rounded-2xl p-12 text-center cursor-pointer transition-all duration-300 select-none group bg-slate-50",
               dragging
-                ? "border-primary bg-primary/5 scale-[1.02] shadow-xl shadow-primary/10"
-                : "border-border/60 hover:border-primary/50 hover:bg-primary/2",
+                ? "border-primary bg-indigo-50/50 scale-[1.02] shadow-xl shadow-primary/10"
+                : "border-slate-300 hover:border-primary/50 hover:bg-white",
               file &&
                 !dragging &&
-                "border-emerald-500/50 bg-emerald-500/5 hover:border-emerald-500",
+                "border-emerald-400 bg-emerald-50 hover:border-emerald-500",
             )}
           >
             <div className="flex flex-col items-center gap-3">
               <div
                 className={cn(
-                  "w-16 h-16 rounded-full flex items-center justify-center mb-2 transition-transform duration-300 group-hover:scale-110",
+                  "w-16 h-16 rounded-full flex items-center justify-center mb-2 transition-transform duration-300 group-hover:scale-110 shadow-sm",
                   file
-                    ? "bg-emerald-500/20 text-emerald-500"
-                    : "bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary",
+                    ? "bg-emerald-100 text-emerald-600"
+                    : "bg-white text-slate-400 group-hover:text-primary group-hover:bg-indigo-50 border border-slate-100",
                 )}
               >
                 {file ? (
@@ -148,12 +141,12 @@ export default function ApplyStep2() {
                 <p
                   className={cn(
                     "text-lg font-semibold tracking-tight",
-                    file ? "text-emerald-500" : "text-foreground",
+                    file ? "text-emerald-700" : "text-slate-700",
                   )}
                 >
                   {file ? file.name : "Click or drag to upload"}
                 </p>
-                <p className="text-sm text-muted-foreground mt-1.5 font-medium">
+                <p className="text-sm mt-1.5 font-medium text-slate-500">
                   {file
                     ? `${(file.size / 1024).toFixed(0)} KB · ${file.type.split("/")[1].toUpperCase()}`
                     : "PDF, JPG, or PNG (max. 5MB)"}
@@ -179,7 +172,7 @@ export default function ApplyStep2() {
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-full px-4"
+                className="text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-full px-4"
                 id="upload-remove"
                 onClick={() => setFile(null)}
               >
@@ -193,7 +186,7 @@ export default function ApplyStep2() {
               type="button"
               variant="outline"
               size="lg"
-              className="h-14 px-6 rounded-xl hover:bg-muted"
+              className="h-14 px-6 rounded-xl border-slate-200 text-slate-700 hover:bg-slate-100 hover:text-slate-900"
               id="upload-back"
               onClick={() => router.push("/apply")}
             >
@@ -204,11 +197,14 @@ export default function ApplyStep2() {
               type="submit"
               size="lg"
               id="upload-submit"
-              className="flex-1 h-14 rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all text-base"
+              className="flex-1 h-14 rounded-xl shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/25 transition-all text-base disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={loading || !file}
             >
               {loading ? (
-                "Uploading…"
+                <span className="flex items-center gap-2">
+                  <span className="spinner-sm" />
+                  Uploading…
+                </span>
               ) : (
                 <>
                   <Upload className="w-5 h-5 mr-2" />
@@ -219,7 +215,7 @@ export default function ApplyStep2() {
             </Button>
           </div>
         </form>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }
