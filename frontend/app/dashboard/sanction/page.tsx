@@ -177,7 +177,7 @@ function LoanReviewModal({
                 </div>
               </div>
               <a
-                href={`http://localhost:8080/${loan.salarySlipPath.replace(/\\/g, "/").replace(/^.*uploads/, "uploads")}`}
+                href={`${process.env.NEXT_PUBLIC_API_URL}/${loan.salarySlipPath.replace(/\\/g, "/").replace(/^.*uploads/, "uploads")}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 text-xs font-bold bg-white border border-slate-200 px-3 py-1.5 rounded-lg text-slate-700 hover:text-primary hover:border-primary/30 transition-colors shadow-sm"
